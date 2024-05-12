@@ -4,6 +4,57 @@
 High
 
 ## Lines of code
+https://github.com/code-423n4/2024-04-dyad/blob/cd48c684a58158de444b24854ffd8f07d046c31b/src/core/Vault.sol#L102
+
+
+## Vulnerability details
+
+### Impact
+Though the vulnerabile part is not directly in scope, but it affects the code in scope. Since due to limited scope i have gathered all the issues in a single report that's why decided to go with high, reasons of which can be seen in next part.
+Protocol expected behavior may not work as expected by the protocol , since the value returned by oracle might be 0 if the price returned by chainlink oracle is 0 or maybe just due to insufficient validation leading to stale prices.
+
+One of the main impact is the collatRatio calculated by the project can deviate by a certain percentage which might result in user redeem less of his collateral than deserving
+
+## Proof of Concept
+1.Chainlink has taken oracles offline in some cases. In such a scenario if the oracle price that is fetched in *vault.sol* through`oracle.latestRoundData();`
+where it checks this `if (block.timestamp > updatedAt + STALE_DATA_TIMEOUT) revert StaleData()` and then returns the price like this ` return answer.toUint256();`
+https://github.com/code-423n4/2024-04-dyad/blob/cd48c684a58158de444b24854ffd8f07d046c31b/src/core/Vault.sol#L91
+But the problem is that if chainlink has taken oracles offline then the answer would be 0 , & the OZ safeCast would pass this value
+```
+ function toUint256(int256 value) internal pure returns (uint256) {
+        require(value >= 0, "SafeCast: value must be positive");
+        return uint256(value);
+    }
+```
+Thus when a user wants to withdraw or redeem their asset their amount will become 0, due to division by 0, Making withdrawing & redemtion frozen. And if in that time their collateral value goes below the threshold, they can get liquidated easily
+
+2. For stable coins Chainlink might return minAnswer instead of just returning 0
+
+3. In the protocol implementation the roundId is not validated. [Refer to the chainlink docs for this] ,It should not be assumed that *updatedAt* only returns fresh prices
+
+4. ETH/USD price feed for example have a deviation of 0.5% on mainnet, meaning price will only be updated once the price movement exceeds 0.5% in the heartbeat period. If the market price of WETH is lower than oracle price, it is possible to  decrease the amount of collateral and thus possibly leading to arbitrage
+
+
+### Tools Used
+Manual Analysis
+
+### Recommended Mitigation Steps
+1. Add proper safeguard for this case, maybe wrapping them up in a try/catch block
+
+2. Also if the price doesn't go below 0 , if it just crashes like Luna , it's better to have a min/max threshold in check for those events
+
+3. `require(answeredInRound >= roundId)` the protocol should check for stale or incorrect prices
+
+4.Consider a minting fee higher than the deviation
+
+
+
+# Finiding -2
+
+## Severity 
+High
+
+## Lines of code
 https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/SemiFungiblePositionManager.sol#L837
 
 
@@ -56,7 +107,49 @@ Maybe specifing a `minAMountOut` after the swap,
 Uniswap
 
 
-# Finding 2 
+
+# Finding -3
+
+## Severity 
+Medium
+
+## Lines of code
+https://github.com/code-423n4/2024-04-dyad/blob/cd48c684a58158de444b24854ffd8f07d046c31b/src/core/VaultManagerV2.sol#L184
+
+
+# Vulnerability details
+
+### Impact
+An attacker can perform a sandwich attack on calls to redeemDYAD to make an instantaneous profit from the protocol. This effectively steals funds away from other legitimate users of the protocol.
+A malicious user could listen to the mempool for calls to redeemDYAD, at which point they can perform a sandwich attack by calling Deposit -> mint before the redeem transaction and then redeem themselves after the withdrawal transaction. They can accomplish this using a tool like flashbots and make an instantaneous profit due to changes in exchange rates.
+
+### Proof of Concept
+The protocol actually has a same block check for this issue , but the issue still remains because the user will still profit in the same manner due to the fluctuation in exchange rates.
+If a user wants to redeem their funds they call redeemDYAD , so now a flashbot may just deposit some kerosine and mint some DYAD where they have to pass only this check ..
+```
+uint newDyadMinted = dyad.mintedDyad(address(this), id) + amount;
+if (getNonKeroseneValue(id) < newDyadMinted)     revert NotEnoughExoCollat();
+```
+which they can pass if they already had some deposited weth as collateral
+And now since kerosine price is determined by
+`kerosine price = (tvl - dyad.totalsupply) / total kerosine supply`
+So the flashbots depositing will make dyad.totalsupply go up and total kerosine supply in the vault also high resulting in decrement of kerosine price
+Remember there are also chainlink stale prices for kerosine which can make these things even worse & make the profit for the user much more.
+
+### Tools Used
+Manual review
+
+### Recommended Mitigation Steps
+Not really sure since if we even implement time based withdraw system it still might not be totally mitigated
+
+
+### Assessed type
+Error
+
+
+
+
+# Finding 4 
 
 ## Severity 
  Medium
@@ -275,3 +368,20 @@ Add an unchecked block to the following functions in Math.sol:
 
 ### Assessed type
 Uniswap
+
+
+# Finding -7
+
+risk = QA (Quality Assurance)
+
+## [L-01] Contract may not be initialized coorectly since no explicitly checking the address initialized 
+Lines of code
+https://github.com/code-423n4/2024-04-dyad/blob/4a987e536576139793a1c04690336d06c93fca90/src/core/VaultManagerV2.sol#L49
+https://github.com/code-423n4/2024-04-dyad/blob/4a987e536576139793a1c04690336d06c93fca90/src/core/Vault.kerosine.sol#L26
+https://github.com/code-423n4/2024-04-dyad/blob/4a987e536576139793a1c04690336d06c93fca90/src/core/Vault.kerosine.bounded.sol#L17
+https://github.com/code-423n4/2024-04-dyad/blob/4a987e536576139793a1c04690336d06c93fca90/src/core/Vault.kerosine.unbounded.sol#L21
+
+
+### Recommended Mitigation Steps
+Add a 0 address check for each of the instances
+
