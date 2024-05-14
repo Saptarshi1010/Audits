@@ -1,4 +1,4 @@
-# Finding -1
+# Finding -1 Chainlink Price manipulation
 
 ## Severity 
 High
@@ -49,10 +49,50 @@ Manual Analysis
 
 
 
-# Finiding -2
+
+# Finding -2 `Abi.encodePAcked` allows hash collision
+
+## Severity- Medium 
+
+## Lines of code
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L462
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L1643
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L1674
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L1674
+
+
+## Vulnerability details
+
+### Impact
+[From the solidity documentation](https://docs.soliditylang.org/en/v0.8.17/abi-spec.html?highlight=collisions#non-standard-packed-mode) > If you use keccak256(abi.encodePacked(a, b)) and both a and b are dynamic types, it is easy to craft collisions in the hash value by moving parts of a into b and vice-versa. More specifically, `abi.encodePacked("a", "bc")` == `abi.encodePacked("ab", "c")`.
+
+### Proof of Concept
+The problem lies in the following lines :
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L462
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L1643
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L1674
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L1674
+these dynamic values are user-specified function arguments in functions, meaning anyone can specify the value of these arguments when calling the function.
+The abi.encodePacked method is called where there are multiple dynamically-sized types. Trying to pack these dynamically-sized types leads to ambiguity in unpacking. This makes it difficult to impossible to unpack, especially in a safe manner. It is made more difficult, in a case like this, because users have some limited input control over the contents passed via the name and symbol parameters
+
+> There can be many more instances of these for eg. in SFPM.sol many such instances are used.
+
+### Tools Used
+Manual Analysis
+
+### Recommended Mitigation Steps
+Use `abi.encode` instead of `abi.encodePAcked` if not necessary
+
+### Assessed type
+Invalid Validation
+
+
+
+
+# Finiding -3 Uniswap deadline check
 
 ## Severity 
-High
+Med
 
 ## Lines of code
 https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/SemiFungiblePositionManager.sol#L837
@@ -108,7 +148,46 @@ Uniswap
 
 
 
-# Finding -3
+# Finding 4 Tokens that transfer less than amount
+
+## Severity- Medium
+
+## Lines of code
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticPool.sol#L326
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/libraries/InteractionHelper.sol#L24
+https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/PanopticFactory.sol#L251
+
+
+## Vulnerability details
+
+### Impact
+The report is not about fee on transfer tokens
+And the protocol also specifies that pools will not have huge amount if tokens,
+that the tokens amount will not exceed 2^127 - 1. in one pool.
+
+But the protocol has a approval for uint256.max in `InteractionHelper:doapprovals`
+Some tokens such as cUSDCv3 contain a special case for amount == type(uint256).max in their transfer functions that results in only the user's balance being transferred. This can be used to shut down several pool operations.
+
+### Proof of Concept
+When someone calls `Panopticfactory:deployNewPool` to deploy a new pool which calls `PanopticPool:startPool` and then ultimately calls the helper contract  to deploy the pool with the tokens
+
+So, An attacker can put dust of this token in a wallet, and then call deployNewPool() with type(uint256).max of this token. If the pool has not already been funded, then poolAmount will be at type(uint256).max despite nothing being in the pool. It is now not possible to fund the pool.
+
+So, anyone wanting to interact or trade with one such pool will fail
+
+### Tools Used
+Manual Review
+
+### Recommended Mitigation Steps
+Explicitly do not support these tokens
+
+### Assessed type
+ERC20
+
+
+
+
+# Finding -5 MEV Sandwich Attack
 
 ## Severity 
 Medium
@@ -117,7 +196,7 @@ Medium
 https://github.com/code-423n4/2024-04-dyad/blob/cd48c684a58158de444b24854ffd8f07d046c31b/src/core/VaultManagerV2.sol#L184
 
 
-# Vulnerability details
+## Vulnerability details
 
 ### Impact
 An attacker can perform a sandwich attack on calls to redeemDYAD to make an instantaneous profit from the protocol. This effectively steals funds away from other legitimate users of the protocol.
@@ -142,19 +221,79 @@ Manual review
 ### Recommended Mitigation Steps
 Not really sure since if we even implement time based withdraw system it still might not be totally mitigated
 
-
 ### Assessed type
 Error
 
 
 
 
-# Finding 4 
+# Finding -6 Both reserves not check while removing liquidity
+
+## Severity Medium
+## Lines of code
+https://github.com/code-423n4/2024-01-salty/blob/53516c2cdfdfacb662cdea6417c52f23c94d5b5b/src/pools/Pools.sol#L187
+
+## Vulnerability details
+
+### Impact
+The Liquidation process happens something like this `CollateralAndLiquidity::liquidator` -> `Pools::removeLiquidity` , `StakingRewards::_decreaseUserShare`
+
+### Proof of Concept
+So, During liquidation process, while `removeLiquidity` is called which checks the amount to remove from each reserves, that if the reserves are greater than the Dust amount, but while checking the reserves it doesn't check both the reserves it only checks `reserve0` twice
+```
+function removeLiquidity( IERC20 tokenA, IERC20 tokenB, uint256 liquidityToRemove, uint256 minReclaimedA, uint256 minReclaimedB, uint256 totalLiquidity ) external nonReentrant returns (uint256 reclaimedA, uint256 reclaimedB)
+                {
+                require( msg.sender == address(collateralAndLiquidity), "Pools.removeLiquidity is only callable from the CollateralAndLiquidity contract" );
+                require( liquidityToRemove > 0, "The amount of liquidityToRemove cannot be zero" );
+
+                (bytes32 poolID, bool flipped) = PoolUtils._poolIDAndFlipped(tokenA, tokenB);
+
+                // Determine how much liquidity is being withdrawn and round down in favor of the protocol
+                PoolReserves storage reserves = _poolReserves[poolID];
+                reclaimedA = ( reserves.reserve0 * liquidityToRemove ) / totalLiquidity;
+                reclaimedB = ( reserves.reserve1 * liquidityToRemove ) / totalLiquidity;
+
+                reserves.reserve0 -= uint128(reclaimedA);
+                reserves.reserve1 -= uint128(reclaimedB);
+
+                // Make sure that removing liquidity doesn't drive either of the reserves below DUST.
+                // This is to ensure that ratios remain relatively constant even after a maximum withdrawal.
+      require((reserves.reserve0 >= PoolUtils.DUST) && (reserves.reserve0 >= PoolUtils.DUST), "Insufficient reserves after liquidity removal");
+
+                // Switch reclaimed amounts back to the order that was specified in the call arguments so they make sense to the caller
+                if (flipped)
+                        (reclaimedA,reclaimedB) = (reclaimedB,reclaimedA);
+
+                require( (reclaimedA >= minReclaimedA) && (reclaimedB >= minReclaimedB), "Insufficient underlying tokens returned" );
+
+                // Send the reclaimed tokens to the user
+                tokenA.safeTransfer( msg.sender, reclaimedA );
+                tokenB.safeTransfer( msg.sender, reclaimedB );
+
+                emit LiquidityRemoved(tokenA, tokenB, reclaimedA, reclaimedB, liquidityToRemove);
+                }
+```
+
+
+### Tools Used
+VS Code
+
+### Recommended Mitigation Steps
+Replace this with the original code
+require((reserves.reserve0 >= PoolUtils.DUST) && (reserves.reserve1 >= PoolUtils.DUST), "Insufficient reserves after liquidity removal");
+
+### Assessed type
+Invalid Validation
+
+
+
+
+# Finding 7 Chainlink oracle
 
 ## Severity 
  Medium
+ 
 ## Lines of code
-
 https://github.com/code-423n4/2024-03-revert-lend/blob/435b054f9ad2404173f36f0f74a5096c894b12b7/src/V3Oracle.sol#L337-L339
 
 
@@ -192,7 +331,7 @@ Oracle
 
 
 
-# Finding 3
+# Finding 8 Slot0 manipulation
 
 ## Severity 
  Medium
@@ -227,7 +366,7 @@ Uniswap
 
 
 
-# Finding 4
+# Finding  9 ERC 20 tokens
 
 ## Severity 
  Medium
@@ -292,7 +431,7 @@ But there are tokens such as Tether Gold , which returns *false* even if the tra
 
 
 
-# Finding 5
+# Finding 1A Invalid validation
 
 ## Severity
 Low/QA
@@ -333,7 +472,7 @@ function getPortfolioValue(
 DoS
 
 
-# Finding 6
+# Finding 1b Math
 
 ## Severity 
 Low/QA
@@ -370,7 +509,7 @@ Add an unchecked block to the following functions in Math.sol:
 Uniswap
 
 
-# Finding -7
+# Finding -1C Zero address check
 
 risk = QA (Quality Assurance)
 
