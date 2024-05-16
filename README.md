@@ -6,3 +6,4 @@ The repo will be updated in due time with the findings of each i make , after th
 
 1. Reports.md contains the reports of bug bouty's that i submitted
 2. Findings.md contains the findings of vulnerabilities in different protocols, The names have been ommited for meantime for mainting annonimity
+3. [audit.md](https://github.com/Saptarshi1010/Audits/blob/main/audit.md) contains the vulnerability i reported to different protocols
