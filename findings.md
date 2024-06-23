@@ -89,63 +89,31 @@ Invalid Validation
 
 
 
-# Finiding -3 Uniswap deadline check
+# Create methods are suspicious of the reorg attack
 
-## Severity 
-Med
+## Severity
+Medium Risk
 
-## Lines of code
-https://github.com/code-423n4/2024-04-panoptic/blob/833312ebd600665b577fbd9c03ffa0daf250ed24/contracts/SemiFungiblePositionManager.sol#L837
+## Relevant GitHub Links
+https://github.com/Cyfrin/2024-05-Sablier/blob/43d7e752a68bba2a1d73d3d6466c3059079ed0c6/v2-periphery/src/SablierV2MerkleLockupFactory.sol#L36
 
+https://github.com/Cyfrin/2024-05-Sablier/blob/43d7e752a68bba2a1d73d3d6466c3059079ed0c6/v2-periphery/src/SablierV2MerkleLockupFactory.sol#L71
 
-## Vulnerability details
+## Summary
+Any airdrop amount sent to the contract could potentially be withdrawn by anyone else. All in all, it could lead to the theft of user funds. Since the project is going to get deployed in all evm compatible chains L2's such as Optimistic rollups (Optimism/Arbitrum) are also suspect to reorgs since if someone finds a fraud the blocks will be reverted, even though the user receives a confirmation.
 
-### Impact
-AMMs provide their users with an option to limit the execution of their pending actions, such as swaps or adding and removing liquidity. The most common solution is to include a deadline timestamp as a parameter (for example see Uniswap V2 and Uniswap V3). If such an option is not present, users can unknowingly perform bad trades:
-I am giving a simple example(not protocol related, but just for simplicity) of not having a deadline check, for just swapping 
+## Vulnerability Details
+Imagine that Alice deploys a new SablierV2MerkleLL & SablierV2MerkleLt, and then sends funds to it. Bob sees that the network block reorg happens and calls createMerkleLL & createMerkleLT. Thus, it creates SablierV2MerkleLL/SablierV2MerkleLt with an address to which Alice sends funds. Then Alices’ transactions are executed and Alice transfers funds to Bob’s controlled contract.
+Polygon re-org reference: Polygon blocks forked:
 
-Alice wants to swap 100 tokens for 1 ETH and later sell the 1 ETH for 1000 DAI.
+## Impact
+The airdrop amount will be sent to wrong contract due to block reorg
 
-The transaction is submitted to the mempool, however, Alice chose a transaction fee that is too low for miners to be interested in including her transaction in a block. The transaction stays pending in the mempool for extended periods, which could be hours, days, weeks, or even longer.
-
-When the average gas fee dropped far enough for Alice's transaction to become interesting again for miners to include it, her swap will be executed. In the meantime, the price of ETH could have drastically changed. She will still get 1 ETH but the DAI value of that output might be significantly lower.
-
-She has unknowingly performed a bad trade due to the pending transaction she forgot about.
-An even worse way this issue can be maliciously exploited is through MEV:
-The swap transaction is still pending in the mempool. Average fees are still too high for miners to be interested in it. The price of tokens has gone up significantly since the transaction was signed, meaning Alice would receive a lot more ETH when the swap is executed.Although the protocol calculates the slippage off chain , But still  that also means that her maximum slippage value can be outdated and would allow for significant slippage.
-
-A MEV bot detects the pending transaction. Since the outdated maximum slippage value now allows for high slippage, the bot sandwiches Alice, resulting in significant profit for the bot and significant loss for Alice.
-
-
-### Proof of Concept
-```
-(int256 swap0, int256 swap1) = _univ3pool.swap(//@audit-issue no deadline check or not swapping with router
-               msg.sender,
-               zeroForOne,
-               swapAmount,
-               zeroForOne
-                   ? Constants.MIN_V3POOL_SQRT_RATIO + 1
-                   : Constants.MAX_V3POOL_SQRT_RATIO - 1,
-               data
-           );
-```
-there is no deadline check set for swapping. and the slippage check is done off chain and we don't know the slippage parameters, And there is also no expected minAmount check specified by the protocol.
-As said in the impact a simple example can be since the protocol is associated with options trading, the impact could be much bigger because if the tx. doesn't go through at a particular period of time the users might face a loss.
-
-Let's say Alice wants to open a long/short put/call position she submits a tx specifing the strike price,  & other necessary things in the tokenId positionList, but due to her low tx. fee it doesn't go though or a bot might sandwich the position, taking away alice profit from that position & alice makes a loss instead of profit
-If the option is also not executed under a certain expiry date of the option,it might be a case of DOS also
-
-### Tools Used
+## Tools Used
 Manual Review
 
-### Recommended Mitigation Steps
-We recommend the protocol use deadline check (not block.timestamp, since tx can be sitting in the memepool & executed after a long time) for swapping deadline and swap with Unsiwap Router V3 instead of the pool directly!
-Maybe specifing a `minAMountOut` after the swap,
-
-
-### Assessed type
-Uniswap
-
+## Recommendations
+Deploy such contracts via create2 with salt that includes msg.sender.
 
 
 # Finding 4 Tokens that transfer less than amount
