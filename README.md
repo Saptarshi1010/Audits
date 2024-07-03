@@ -20,7 +20,7 @@ I am always looking for new opportunities be it a job opening, private audit/sec
 # Summary 
 | Overall | High risk | Medium risk |
 |:--:|:--:|:--:|
-| 5  | 1  | 4  |  
+| 10  | 1  | 9  |  
 ## <img src="https://res.cloudinary.com/droqoz7lg/image/upload/v1689080263/snhkgvtsidryjdtx0pce.png" width=32 height=22> CodeHawks
 | Contest | High risk | Medium risk | Ranking | Security report | 
 |:--:|:--:|:--:|:--:|:--:|
