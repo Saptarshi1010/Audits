@@ -32,7 +32,7 @@ I am always looking for new opportunities be it a job opening, private audit/sec
 |:--:|:--:|:--:|:--:|:--:|
 | [Salty](...) | 0 | 1 |  | [Report](https://github.com/code-423n4/2024-01-salty-findings/issues/784) |
 | [Revert Lend](..) |  | 1 | | [Report](https://github.com/code-423n4/2024-03-revert-lend-findings/issues/175) |
-| [Renzo](...) | 1 | 1 | - |[1](https://github.com/code-423n4/2024-04-renzo-findings/issues/484), [2](https://github.com/code-423n4/2024-04-renzo-findings/issues/326) |
+| [Renzo](...) | 1 | 1 | - |[H](https://github.com/code-423n4/2024-04-renzo-findings/issues/484), [M](https://github.com/code-423n4/2024-04-renzo-findings/issues/326) |
 | [Noya](...) | - | 5 | - |[Coming soon](....) |
 
 
