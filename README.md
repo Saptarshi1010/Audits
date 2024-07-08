@@ -20,7 +20,7 @@ I am always looking for new opportunities be it a job opening, private audit/sec
 # Summary 
 | Overall | High risk | Medium risk |
 |:--:|:--:|:--:|
-| 10  | 1  | 9  |  
+| 10  | 1  |  11 |  
 ## <img src="https://res.cloudinary.com/droqoz7lg/image/upload/v1689080263/snhkgvtsidryjdtx0pce.png" width=32 height=22> CodeHawks
 | Contest | High risk | Medium risk | Ranking | Security report | 
 |:--:|:--:|:--:|:--:|:--:|
@@ -33,6 +33,8 @@ I am always looking for new opportunities be it a job opening, private audit/sec
 | [Salty](...) | 0 | 1 |  | [Report](https://github.com/code-423n4/2024-01-salty-findings/issues/784) |
 | [Revert Lend](..) |  | 1 | | [Report](https://github.com/code-423n4/2024-03-revert-lend-findings/issues/175) |
 | [Renzo](...) | 1 | 1 | - |[H](https://github.com/code-423n4/2024-04-renzo-findings/issues/484), [M](https://github.com/code-423n4/2024-04-renzo-findings/issues/326) |
-| [Noya](...) | - | 5 | - |[Coming soon](....) |
+| [Noya](...) | - | 5 | - |[not yet public](....) |
+| [Olas](...) | - | 1 | - |[not yet public](...)| 
+| [Predy](...)  | - | 2  | - |[not yet public](....)|
 
 
