@@ -18,26 +18,19 @@ The repo will be updated in due time with the findings of each i make , after th
 I am always looking for new opportunities be it a job opening, private audit/security review, or simply for collaborations. Feel free to reach out via:
  - Code4rena Profile: [MSaptarshi](https://code4rena.com/@MSaptarshi)
  - CodeHawks Profile: [MSaptarshi](https://www.codehawks.com/profile/clo5qv6340012l908bg06iu1w)
- - Email: saptarshimitra0826@gmail.com
 
 # Summary 
 | Overall | High risk | Medium risk |
 |:--:|:--:|:--:|
-| 12  | 1  |  11 |  
-## <img src="https://res.cloudinary.com/droqoz7lg/image/upload/v1689080263/snhkgvtsidryjdtx0pce.png" width=32 height=22> CodeHawks
-| Contest | High risk | Medium risk | Ranking | Security report | 
-|:--:|:--:|:--:|:--:|:--:|
-| [Sablier](...) | 0 | 1 | - |[Report](https://codehawks.cyfrin.io/c/2024-05-Sablier/s/clwti4umh000g127d7xby43xe) |
-
-
-## <img src="https://code4rena.com/images/c4-logo-icon.svg" width=40 height=27> Code4rena
-| Contest | High risk | Medium risk | Ranking | Security report | 
-|:--:|:--:|:--:|:--:|:--:|
-| [Salty](...) | 0 | 1 |  | [Report](https://github.com/code-423n4/2024-01-salty-findings/issues/784) |
-| [Revert Lend](..) |  | 1 | | [Report](https://github.com/code-423n4/2024-03-revert-lend-findings/issues/175) |
-| [Renzo](...) | 1 | 1 | - |[H](https://github.com/code-423n4/2024-04-renzo-findings/issues/484), [M](https://github.com/code-423n4/2024-04-renzo-findings/issues/326) |
-| [Noya](...) | - | 5 | - |[not yet public](....) |
-| [Olas](...) | - | 1 | - |[not yet public](...)| 
-| [Predy](...)  | - | 2  | - |[not yet public](....)|
-
+| 15  | 1  |  14 |  
+| Contest | High risk | Medium risk | Ranking | Security report |
+| Sablier | - | 1 | - |[Report](https://codehawks.cyfrin.io/c/2024-05-Sablier/s/clwti4umh000g127d7xby43xe) |
+| Salty | - | 1 |  | [Report](https://github.com/code-423n4/2024-01-salty-findings/issues/784) |
+| Revert Lend |  | 1 | | [Report](https://github.com/code-423n4/2024-03-revert-lend-findings/issues/175) |
+| Renzo | 1 | 1 | - |[H](https://github.com/code-423n4/2024-04-renzo-findings/issues/484), [M](https://github.com/code-423n4/2024-04-renzo-findings/issues/326) |
+| Noya | - | 5 | - |[not yet public](....) |
+| Olas | - | 1 | - |[not yet public](...)| 
+| Predy  | - | 2  | - |[not yet public](....)|
+| Biconomy | - | 1 | - | [Report](https://codehawks.cyfrin.io/c/2024-07-biconomy/s/clydxokc20009s0uq38nw9vrh)
+| MagicSea | - | 1 | - | [Report]()
 
