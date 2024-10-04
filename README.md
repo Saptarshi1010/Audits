@@ -16,8 +16,9 @@ The repo will be updated in due time with the findings of each i make , after th
    
 ## Contact Information
 I am always looking for new opportunities be it a job opening, private audit/security review, or simply for collaborations. Feel free to reach out via:
- - Code4rena Profile: [MSaptarshi](https://code4rena.com/@MSaptarshi)
- - CodeHawks Profile: [MSaptarshi](https://www.codehawks.com/profile/clo5qv6340012l908bg06iu1w)
+ - [Code4rena](https://code4rena.com/@MSaptarshi)
+ - [CodeHawks](https://www.codehawks.com/profile/clo5qv6340012l908bg06iu1w)
+ - [Sherlock](https://audits.sherlock.xyz/watson/MSaptarshi)
 
 # Summary 
 | Overall | High risk | Medium risk |
