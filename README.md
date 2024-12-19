@@ -23,7 +23,7 @@ I am always looking for new opportunities be it a job opening, private audit/sec
 # Summary 
 | Overall | High risk | Medium risk |
 |:--:|:--:|:--:|
-| 15  | 1  |  14 |  
+| 24  | 4  |  20 |  
 | Contest | High risk | Medium risk | Ranking | Security report |
 | Sablier | - | 1 | - |[Report](https://codehawks.cyfrin.io/c/2024-05-Sablier/s/clwti4umh000g127d7xby43xe) |
 | Salty | - | 1 |  | [Report](https://github.com/code-423n4/2024-01-salty-findings/issues/784) |
@@ -34,4 +34,8 @@ I am always looking for new opportunities be it a job opening, private audit/sec
 | Predy  | - | 2  | - |[not yet public](....)|
 | Biconomy | - | 1 | - | [Report](https://codehawks.cyfrin.io/c/2024-07-biconomy/s/clydxokc20009s0uq38nw9vrh)
 | MagicSea | - | 1 | - | [Report]()
+| Zaros | - | 1 | - | [Report]()
+| Tadle | 1 | 2 | - | [Report]()
+| Velocimeter | 2 | 1 | - | [Report]()
+| Uniswap | -   | 1 | - | [Report]()
 
